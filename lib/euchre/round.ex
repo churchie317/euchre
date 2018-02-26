@@ -38,39 +38,33 @@ defmodule Euchre.Round do
   defp deal_hand(player, round) do
     {:ok, hand, deck} = Euchre.Hand.new(round.deck)
 
-    %Round{
-      round
-      | deck: deck,
-        instructions: [Utils.notify_player(player, {:deal_hand, hand}) | round.instructions],
-        players: [player | round.players],
-        players_left: [player | round.players]
-    }
+    round
+    |> Map.put(:deck, deck)
+    |> Map.put(:instructions, [
+      Utils.notify_player(player, {:deal_hand, hand}) | round.instructions
+    ])
+    |> Map.put(:players, [player | round.players])
+    |> Map.put(:players_left, [player | round.players])
   end
 
   defp handle_bid(%Round{players_left: [_current, next | rest], players: players} = round, bid) do
     case bid do
       :order_up ->
-        %Round{
-          round
-          | instructions: [Utils.notify_player(List.first(players), :play)],
-            players_left: players,
-            trump: List.first(round.deck).suit
-        }
+        round
+        |> Map.put(:instructions, [Utils.notify_player(List.first(players), :play)])
+        |> Map.put(players_left, players)
+        |> Map.put(:trump, List.first(round.deck).suit)
 
       {:pick_trump, suit} when suit in [:clubs, :diamonds, :hearts, :spades] ->
-        %Round{
-          round
-          | instructions: [Utils.notify_player(List.first(players), :play)],
-            players_left: players,
-            trump: suit
-        }
+        round
+        |> Map.put(:instructions, [Utils.notify_player(List.first(players), :play)])
+        |> Map.put(:players_left, players)
+        |> Map.put(:trump, suit)
 
       :pass ->
-        %Round{
-          round
-          | instructions: [Utils.notify_player(next, :bid)],
-            players_left: [next | rest]
-        }
+        round
+        |> Map.put(:instructions, [Utils.notify_player(next, :bid)])
+        |> Map.put(players_left, [next | rest])
     end
   end
 
