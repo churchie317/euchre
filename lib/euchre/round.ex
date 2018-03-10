@@ -52,7 +52,7 @@ defmodule Euchre.Round do
       :order_up ->
         round
         |> Map.put(:instructions, [Utils.notify_player(List.first(players), :play)])
-        |> Map.put(players_left, players)
+        |> Map.put(:players_left, players)
         |> Map.put(:trump, List.first(round.deck).suit)
 
       {:pick_trump, suit} when suit in [:clubs, :diamonds, :hearts, :spades] ->
@@ -64,7 +64,7 @@ defmodule Euchre.Round do
       :pass ->
         round
         |> Map.put(:instructions, [Utils.notify_player(next, :bid)])
-        |> Map.put(players_left, [next | rest])
+        |> Map.put(:players_left, [next | rest])
     end
   end
 

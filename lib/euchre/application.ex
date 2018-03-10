@@ -1,20 +1,21 @@
 defmodule Euchre.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
+
+  @registry_name :euchre_registry
 
   use Application
 
   def start(_type, _args) do
-    # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Euchre.Worker.start_link(arg)
-      # {Euchre.Worker, arg},
+      {Registry, keys: :unique, name: @registry_name},
+      {Euchre.Rounds.Supervisor, nil}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Euchre.Supervisor]
+    opts = [strategy: :rest_for_one, name: Euchre.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def via_tuple(process_name) do
+    {:via, Registry, {@registry_name, process_name}}
   end
 end
